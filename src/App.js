@@ -12,23 +12,24 @@ class App extends Component {
 	};
 
 	componentDidMount() {
-		this.handleData();
+		this.handleReleases();
 	}
 
-	handleData = async () => {
+	handleReleases = async () => {
 		this.setState({ loading: true });
 
 		try {
 			const { data: releases } = await api.get('/repos/DouglasAmarelo/releases-and-tags/releases');
 
-			releases.published_at = moment(releases.published_at).fromNow();
-			releases.lorem = 'Lorem ipsum';
+			console.log('releases', releases);
+
+			releases[0].published_at = moment(releases[0].published_at).fromNow();
+
+			console.log('releases', releases);
 
 			this.setState({
-				loading: true,
-				releases: releases
+				releases
 			});
-
 		}
 		catch (error) {
 			console.log('Error', error);
@@ -38,13 +39,13 @@ class App extends Component {
 		}
 	};
 
-
 	render() {
-		const { releases } = this.state;
+		const { releases, loading } = this.state;
 
 		return (
 			<div className="App container">
 				<h1>Hello World</h1>
+
 
 				<p>{this.state.tags}</p>
 
@@ -58,23 +59,20 @@ class App extends Component {
 							<p>
 								<strong>Author: </strong>
 								{item.author.login}
-								<img src={item.author.avatar_url} alt={item.author.login} />
+								{/* <img src={item.author.avatar_url} alt={item.author.login} /> */}
 							</p>
 							<p>
 								<strong>Publication date: </strong>
 								{item.published_at}
-								{moment(item.published_at).fromNow()}
 							</p>
 							<p>
 								<strong>Message: </strong>
 								{item.body}
 							</p>
-							<p>{item.lorem}</p>
 						</li>
 					))}
 				</ul>
 			</div>
-
 		);
 	};
 };
