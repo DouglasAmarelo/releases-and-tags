@@ -1,48 +1,77 @@
 import React, { Component } from 'react';
-import ax from 'axios';
+import moment from 'moment';
+import axios from 'axios';
+
+const api = axios.create({ baseURL: 'https://api.github.com/' });
 
 class App extends Component {
 	state = {
+		loading: false,
 		tags: '00900',
 		releases: [],
 	};
 
 	componentDidMount() {
-		console.log('Iniciando....');
 		this.handleData();
 	}
 
 	handleData = async () => {
+		this.setState({ loading: true });
+
 		try {
-			const api = ax.create({ baseURL: 'https://api.github.com/' });
-			const data = await api.get('/repos/DouglasAmarelo/releases-and-tags/releases');
+			const { data: releases } = await api.get('/repos/DouglasAmarelo/releases-and-tags/releases');
 
-			this.setState({ releases: data.data });
+			releases.published_at = moment(releases.published_at).fromNow();
+			releases.lorem = 'Lorem ipsum';
 
-			console.log('releases', data.data[0]);
+			this.setState({
+				loading: true,
+				releases: releases
+			});
+
 		}
 		catch (error) {
-			// this.setState({ repositoryError: true });
-
 			console.log('Error', error);
 		}
-		// finally {
-		// 	this.setState({ loading: false });
-		// }
+		finally {
+			this.setState({ loading: false });
+		}
 	};
 
 
 	render() {
+		const { releases } = this.state;
+
 		return (
 			<div className="App container">
 				<h1>Hello World</h1>
+
 				<p>{this.state.tags}</p>
+
 				<ul>
-					{
-						this.state.releases.map(item => (
-							<li>{item}</li>
-						))
-					}
+					{releases && releases.map(item => (
+						<li key={item.id}>
+							<p>
+								<strong>Release: </strong>
+								{item.name}
+							</p>
+							<p>
+								<strong>Author: </strong>
+								{item.author.login}
+								<img src={item.author.avatar_url} alt={item.author.login} />
+							</p>
+							<p>
+								<strong>Publication date: </strong>
+								{item.published_at}
+								{moment(item.published_at).fromNow()}
+							</p>
+							<p>
+								<strong>Message: </strong>
+								{item.body}
+							</p>
+							<p>{item.lorem}</p>
+						</li>
+					))}
 				</ul>
 			</div>
 
